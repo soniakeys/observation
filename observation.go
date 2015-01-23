@@ -13,11 +13,11 @@ import (
 
 // VMeas represents a "visual" measurment in units convenient for computations.
 type VMeas struct {
-	Mjd        float64 // time of observation
+	MJD        float64 // time of observation
 	coord.Sphr         // components in radians
 	// The apparent magnitude is represented as somehow normalized to "V."
 	// The actual observed magnitude band is not represented here.
-	Vmag float64
+	VMag float64
 	// Quality identifier.  Typically simply the 3 character MPC obscode,
 	// but can be any string to associate the measurement with a quality
 	// level.  This identifier is associated with the obserr keyword
@@ -49,7 +49,7 @@ func (o *SiteObs) Meas() *VMeas {
 
 // EarthObserverVect satisfies a method of the VObs interface.
 func (o *SiteObs) EarthObserverVect() coord.Cart {
-	sth, cth := math.Sincos(astro.Lst(o.Mjd, o.Par.Longitude))
+	sth, cth := math.Sincos(astro.Lst(o.MJD, o.Par.Longitude))
 	return coord.Cart{
 		X: o.Par.RhoCosPhi * cth,
 		Y: o.Par.RhoCosPhi * sth,
