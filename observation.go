@@ -91,8 +91,8 @@ type ParallaxConst struct {
 // is not restriced to these and can be anything convenient.
 type ParallaxMap map[string]*ParallaxConst
 
-// Tracklet, a sequence of observations of the same object.
-type Tracklet struct {
+// Arc, a sequence of observations of the same object.
+type Arc struct {
 	Desig string
 	Obs   []VObs
 }
