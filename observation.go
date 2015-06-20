@@ -29,7 +29,8 @@ type VMeas struct {
 type VObs interface {
 	// underlying measurement--the actual observation
 	Meas() *VMeas
-	// location of observer relative to the center of the earth
+	// location of observer relative to the center of the earth.
+	// units are AU.
 	EarthObserverVect() coord.Cart
 }
 
@@ -49,11 +50,18 @@ func (o *SiteObs) Meas() *VMeas {
 
 // EarthObserverVect satisfies a method of the VObs interface.
 func (o *SiteObs) EarthObserverVect() coord.Cart {
-	sth, cth := math.Sincos(astro.Lst(o.MJD, o.Par.Longitude))
+	return EarthObserverVect(o.MJD, o.Par)
+}
+
+// EarthObserverVect computes the geocenter-observer vector.
+//
+// Result units are AU.
+func EarthObserverVect(mjd float64, p *ParallaxConst) coord.Cart {
+	sth, cth := math.Sincos(astro.Lst(mjd, p.Longitude))
 	return coord.Cart{
-		X: o.Par.RhoCosPhi * cth,
-		Y: o.Par.RhoCosPhi * sth,
-		Z: o.Par.RhoSinPhi,
+		X: p.RhoCosPhi * cth,
+		Y: p.RhoCosPhi * sth,
+		Z: p.RhoSinPhi,
 	}
 }
 
@@ -88,7 +96,7 @@ type ParallaxConst struct {
 
 // ParallaxMap is a mapping from strings to parallax constants.
 // The map key is typically the 3 character MPC obscode, but
-// is not restriced to these and can be anything convenient.
+// is not restricted to these and can be anything convenient.
 type ParallaxMap map[string]*ParallaxConst
 
 // Arc, a sequence of observations of the same object.
