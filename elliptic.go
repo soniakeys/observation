@@ -1,46 +1,45 @@
 // Public domain by author, Sonia Keys
 
-// Formulas from Meeus Chapter 33, Elliptic Motion.
 package observation
 
-// position cut and paste from meeus/elliptic, modified to return additional
-// values.
-//
-// Position returns observed equatorial coordinates of a body with Keplerian elements.
-//
-// Argument e must be a valid V87Planet object for Earth.
-//
-// Results are right ascension and declination α and δ, and elongation ψ,
-// all in radians.  In addition, returns phase angle β, the sun-object distance
-// r in AU and the earth-object distance Δ in AU.
-func (o *Orbit) PositionFromEarth(jde float64, e *pp.V87Planet) (α, δ, ψ, β, r, Δ float64) {
-	return astrometricJ2000(o.Position, jde, e)
-}
+import (
+	"math"
 
-// An ObjPosFunc returns J2000 equatorial coordinates for an object
-// at the given jde.
-type objPosFunc func(jde float64) (x, y, z, r float64)
+	"github.com/soniakeys/astro"
+)
 
-// astrometricJ2000 cut and paste from meeus/elliptic, modified to return
-// additional values phase angle β and observer-object range Δ.
+// Formulas from Meeus Chapter 33, Elliptic Motion.
+
+// AstrometricJ2000 computes astrometric coordinates of an observation.
 //
-// AstrometricJ2000 is a utility function for computing astrometric coordinates.
+// Argument jde is the time of observation, arguments sun and target are
+// functions that return geocentric J2000 equatorial rectangular coodinates
+// of the sun and the target object respectively.
 //
-// Argument f is a function that returns J2000 equatorial rectangular
-// coodinates of a body.
-//
-// Results are J2000 right ascention, declination, and elongation.
-func astrometricJ2000(object, earth) (α, δ, ψ, β, r, Δ float64) {
-	X, Y, Z := solarxyz.PositionJ2000(e, jde)
-	x, y, z, r := f(jde)
+// Results are J2000 right ascension, declination of target as observed from
+// site at the given jde.  Also returns phase angle β, sun-object radius r and
+// observer-object distance Δ.  Returned angles are in radians, distances in AU.
+func AstrometricJ2000(jde float64, sun, target func(jde float64) (x, y, z, r float64)) (α, δ, ψ, β, r, Δ float64) {
+	// AstrometricJ2000 derived from similar function in meeus/elliptic,
+	// modified here to take two functions and return additional
+	// values β, r and Δ.
+	// values phase angle β, sun-object radius r and observer-object distance Δ.
+	//
+	X, Y, Z, R := sun(jde)
+	x, y, z, r := target(jde)
 	// (33.10) p. 229
 	ξ := X + x
 	η := Y + y
 	ζ := Z + z
 	Δ = math.Sqrt(ξ*ξ + η*η + ζ*ζ)
 	{
-		τ := base.LightTime(Δ)
-		x, y, z, r = f(jde - τ)
+		// unit math to convert a distance Δ in AU to light time in τ days:
+		// Δ AU   astro.AU  m           s         day
+		// ---- . ----------- . --------- . ---------
+		//                 AU   astro.C m   86400  s
+		// units cancel to give the assignment statement below.
+		τ := Δ * astro.AU / astro.C / 86400
+		x, y, z, r = target(jde - τ)
 		ξ = X + x
 		η = Y + y
 		ζ = Z + z
@@ -51,7 +50,6 @@ func astrometricJ2000(object, earth) (α, δ, ψ, β, r, Δ float64) {
 		α += 2 * math.Pi
 	}
 	δ = math.Asin(ζ / Δ)
-	R := math.Sqrt(X*X + Y*Y + Z*Z)
 	ψ = math.Acos((ξ*X + η*Y + ζ*Z) / R / Δ)
 	β = math.Acos((ξ*x + η*y + ζ*z) / r / Δ)
 	return
