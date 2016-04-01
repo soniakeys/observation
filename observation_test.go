@@ -33,7 +33,7 @@ func TestSiteObs_EarthObserverVect(t *testing.T) {
 	if math.Abs(eoGot.X-eoWant.X) > 1e-15 ||
 		math.Abs(eoGot.Y-eoWant.Y) > 1e-15 ||
 		math.Abs(eoGot.Z-eoWant.Z) > 1e-15 {
-		t.Fatal("VObs.EarthObserverVect() = %+v, want %+v", eoGot, eoWant)
+		t.Fatalf("VObs.EarthObserverVect() = %+v, want %+v", eoGot, eoWant)
 		return
 	}
 }
