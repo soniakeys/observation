@@ -5,16 +5,15 @@
 package observation
 
 import (
-	"math"
-
 	"github.com/soniakeys/astro"
 	"github.com/soniakeys/coord"
+	"github.com/soniakeys/unit"
 )
 
 // VMeas represents a "visual" measurment in units convenient for computations.
 type VMeas struct {
-	MJD        float64 // time of observation
-	coord.Sphr         // components in radians
+	MJD float64 // time of observation
+	coord.Equa
 	// The apparent magnitude is represented as somehow normalized to "V."
 	// The actual observed magnitude band is not represented here.
 	VMag float64
@@ -57,7 +56,7 @@ func (o *SiteObs) EarthObserverVect() coord.Cart {
 //
 // Result units are AU.
 func EarthObserverVect(mjd float64, p *ParallaxConst) coord.Cart {
-	sth, cth := math.Sincos(astro.Lst(mjd, p.Longitude))
+	sth, cth := astro.Lst(mjd, p.Longitude).Angle().Sincos()
 	return coord.Cart{
 		X: p.RhoCosPhi * cth,
 		Y: p.RhoCosPhi * sth,
@@ -89,7 +88,7 @@ func (o *SatObs) EarthObserverVect() (c coord.Cart) {
 
 // ParallaxConst represents a vector from the center of the Earth.
 type ParallaxConst struct {
-	Longitude float64 // unit is circles
+	Longitude unit.Angle
 	RhoCosPhi float64 // unit is AU
 	RhoSinPhi float64 // unit is AU
 }
