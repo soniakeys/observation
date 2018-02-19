@@ -1,0 +1,19 @@
+[[constraint]]
+  name = "github.com/soniakeys/astro"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/soniakeys/coord"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/soniakeys/mpcformat"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/soniakeys/unit"
+  version = "1.0.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
